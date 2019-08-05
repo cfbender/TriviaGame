@@ -134,7 +134,7 @@ function nextQuestion() {
 		//displays all Q&A and starts the timer
 		$("#question").fadeIn();
 		$("#answers").fadeIn();
-		$("#timer").fadeIn();
+		$("#timer-container").fadeIn();
 		timerStart();
 	}
 }
@@ -180,13 +180,28 @@ function count() {
 	}
 }
 
+//stops time and handles question change if you ran out of time
 function timeStop() {
 	clearInterval(intervalId);
+	if(game.clockRunning){
+		game.questionTimes.push(game.timeLeft);
+		preChange();
+	}	
 	game.clockRunning = false;
-	if (game.timeLeft <= 0) {
-		console.log("time's up!");
-	}
 	game.timeLeft = game.timeLimit;
+}
+
+//handles the functionality when an answer is clicked OR time is up
+function preChange(answer) {
+	let correct = game.questions[game.currentQuestion].correct;
+	//increment current question so the next will be pulled
+	game.currentQuestion++;
+	$("#question").fadeOut();
+	$("#timer-container").fadeOut();
+	//pass the selected answer and the correct answer into the intraquestion function
+	$.when($("#answers").fadeOut()).done(function() {
+		interQuestion(answer, correct);
+});
 }
 
 //huffles an array in place randomly.
@@ -216,15 +231,7 @@ $(document).on("click", ".answer", function() {
 	timeStop();
 	//store the value of the button clicked, and pull the correct answer
 	let answer = $(this).data("answer");
-	let correct = game.questions[game.currentQuestion].correct;
-	//increment current question so the next will be pulled
-	game.currentQuestion++;
-	$("#question").fadeOut();
-	$("#timer").fadeOut();
-	//pass the selected answer and the correct answer into the intraquestion function
-	$.when($("#answers").fadeOut()).done(function() {
-		interQuestion(answer, correct);
-	});
+	preChange(answer);
 });
 
 
