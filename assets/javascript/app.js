@@ -150,6 +150,7 @@ function gameEnd() {
 	let newGame = $("<button>").attr("id", "new-game").text("TRY AGAIN");
 	let gameStats = $("<div>")
 	
+	//appending in game stats then adding it all to the page
 	gameStats.append("<h2> Questions Right: " + game.questionsRight + "</h2>")
 	gameStats.append("<h2> Average Time to Answer: " + game.avgTime + " s </h2>")
 	gameStats.append("<h2> Percent Correct: " + game.correctPercentage * 100 + "% </h2>")
@@ -204,7 +205,6 @@ let intervalId;
 
 //click handlers for the 3 button types
 $("#start").click(function() {
-	$("#game-result").fadeOut();
 	shuffleArray(game.questions);
 	$("#game-header").fadeOut();
 	$.when($("#start").fadeOut()).done(nextQuestion);
@@ -227,15 +227,19 @@ $(document).on("click", ".answer", function() {
 	});
 });
 
-$(document).on("click", "#new-game", function() {
-	
+
+//when new game is clicked, reinitializes game state
+$(document).on("click", "#new-game", function() {	
 	$.when($("#game-result").fadeOut()).done(function(){
 		$("#game-result").empty();
-// questionTimes: [],
-	// currentQuestion: 0,
-	// avgTime: 0,
-	// questionsRight: 0,
-	// correctPercentage: "",
-	// clockRunning: false,
+		game.questionTimes = [];
+		game.currentQuestion = 0;
+		game.avgTime = 0;
+		game.questionsRight = 0;
+		game.correctPercentage = "";
+		game.clockRunning =  false;
+
+		$("#game-header").fadeIn();
+		$("#start").fadeIn();
 	})
 });
