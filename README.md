@@ -1,5 +1,6 @@
 # TriviaGame
-![] (./assets/images/preview.png)
+
+![](./assets/images/preview.png)
 
 ## About the game
 
