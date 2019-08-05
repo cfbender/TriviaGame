@@ -80,7 +80,7 @@ let game = {
 	]
 };
 
-//shows whether the question was correct or not, and give a next question button
+//handles question interchange from answer or timeout
 function interQuestion(answer) {
 	var correct = game.questions[game.currentQuestion].correct;
 	game.currentQuestion++;
@@ -91,7 +91,7 @@ function interQuestion(answer) {
 		//fades out the timer and once it has finished, continues
 		$("#timer").text(game.timeLimit);
 		//create a new empty div to hold content, and clear out the old result
-		let resultContent = $("<div>");
+		let resultContent = $("<div>").addClass("result");
 		$("#question-result").empty();
 
 		if (answer === correct) {
@@ -105,13 +105,13 @@ function interQuestion(answer) {
 		resultContent.append(explanation);
 		$("#question-result").append(resultContent);
 		$("#question-result").fadeIn();
-
+		//shows result screen for some seconds then switches
 		setTimeout(function() {
 			$.when($("#question-result").fadeOut()).done(function() {
 				$("#question-result").empty();
 				nextQuestion();
 			});
-		}, 5 * 1000);
+		}, 3 * 1000);
 		$("#question-result").fadeIn();
 	});
 }
@@ -195,7 +195,7 @@ function count() {
 function timeStop() {
 	clearInterval(intervalId);
 	if (game.clockRunning) {
-		game.questionTimes.push(game.timeLeft);
+		game.questionTimes.push(game.timeLimit - game.timeLeft);
 		interQuestion();
 	}
 	game.clockRunning = false;
@@ -225,7 +225,7 @@ $("#start").click(function() {
 
 $(document).on("click", ".answer", function() {
 	//stop the timer, and record the time it took to answer
-	game.questionTimes.push(game.timeLeft);
+	game.questionTimes.push(game.timeLimit - game.timeLeft);
 	game.clockRunning = false;
 	timeStop();
 	//store the value of the button clicked, and pull the correct answer
