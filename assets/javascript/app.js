@@ -1,11 +1,9 @@
 let game = {
 	timeLimit: 30,
 	timeLeft: 30,
-	gameWin: false,
 	questionTimes: [],
 	currentQuestion: 0,
 	avgTime: 0,
-	questionsShown: 0,
 	questionsRight: 0,
 	correctPercentage: "",
 	clockRunning: false,
@@ -83,44 +81,84 @@ let game = {
 };
 
 //shows whether the question was correct or not, and give a next question button
-function intraQuestion(id, correct) {
+function interQuestion(id, correct) {
 	//fades out the timer and once it has finished, continues
 	$("#timer").text(game.timeLimit);
+	//create a new empty div to hold content, and clear out the old result
+	let resultContent = $("<div>");
+	$("#question-result").empty();
+
 	if (id === correct) {
-		console.log("correct");
+		var resultText = $("<h2>").text("Correct!");
+		game.questionsRight++;
 	} else {
-		console.log("correct");
+		var resultText = $("<h2>").text("Incorrect.");
 	}
-	setTimeout(function() {
-		$("#next-question").fadeIn();
-	}, 2 * 1000)
-	//TODO: Generate correct or incorrect content and append
+	resultContent.append(resultText);
+	var explanation = $("<h3>").text("The correct answer was: " + correct);
+	resultContent.append(explanation);
+	$("#question-result").append(resultContent);
 	$("#question-result").fadeIn();
-	// TODO : If (quesionsShown = all then show end screen after (#next-button text to FINISH))
+
+	setTimeout(function() {
+		$.when($("#question-result").fadeOut()).done(function() {
+			$("#question-result").empty();
+			nextQuestion();
+		});
+	}, 1 * 1000);
+	$("#question-result").fadeIn();
 }
 
 //handles generating the next question screen
 function nextQuestion() {
-	//clears out old answers
-	$("#answers").empty();
-	//grabs the current set of answers
-	let answers = game.questions[game.currentQuestion].answers;
-	//then generates a button for each answer and appends it
-	for (let i in answers) {
-		$("#answers").append(
-			$("<button>")
-				.text(answers[i])
-				.attr("value", answers[i])
-				.addClass("answer")
-		);
+	//first check if all questions have been answered
+	if (game.currentQuestion === game.questions.length) {
+		gameEnd();
+	} else {
+		//clears out old answers
+		$("#answers").empty();
+		//grabs the current set of answers
+		let answers = game.questions[game.currentQuestion].answers;
+		shuffleArray(answers);
+		//then generates a button for each answer and appends it
+		for (let i in answers) {
+			$("#answers").append(
+				$("<button>")
+					.text(answers[i])
+					.attr("data-answer", answers[i])
+					.addClass("answer")
+			);
+		}
+		//grabs current question
+		$("#question").text(game.questions[game.currentQuestion].question);
+		//displays all Q&A and starts the timer
+		$("#question").fadeIn();
+		$("#answers").fadeIn();
+		$("#timer").fadeIn();
+		timerStart();
 	}
-	//grabs current question
-	$("#question").text(game.questions[game.currentQuestion].question);
-	//displays all Q&A and starts the timer
-	$("#question").fadeIn();
-	$("#answers").fadeIn();
-	$("#timer").fadeIn();
-	timerStart();
+}
+
+function gameEnd() {
+	//grabbing empty div from DOM
+	let resultDiv = $("#game-result");
+	//averaging time to answer and calculating % correct
+	game.avgTime = arrayAvg(game.questionTimes);
+	game.correctPercentage = game.questionsRight / game.questions.length;
+
+	//creating our new DOM elements
+	let newGame = $("<button>").attr("id", "new-game").text("TRY AGAIN");
+	let gameStats = $("<div>")
+	
+	gameStats.append("<h2> Questions Right: " + game.questionsRight + "</h2>")
+	gameStats.append("<h2> Average Time to Answer: " + game.avgTime + " s </h2>")
+	gameStats.append("<h2> Percent Correct: " + game.correctPercentage * 100 + "% </h2>")
+
+	resultDiv.append("<h1>Game over!</h1>");
+	resultDiv.append(gameStats);
+	resultDiv.append(newGame);
+
+	resultDiv.fadeIn();
 }
 
 //checks if clock is already running and if not starts it
@@ -150,6 +188,7 @@ function timeStop() {
 	game.timeLeft = game.timeLimit;
 }
 
+//huffles an array in place randomly.
 function shuffleArray(array) {
 	for (let i = array.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
@@ -157,6 +196,7 @@ function shuffleArray(array) {
 	}
 }
 
+//averages all numbers in an array
 arrayAvg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
 
 //initializing a variable to hold the timer interval
@@ -166,15 +206,16 @@ let intervalId;
 $("#start").click(function() {
 	$("#game-result").fadeOut();
 	shuffleArray(game.questions);
+	$("#game-header").fadeOut();
 	$.when($("#start").fadeOut()).done(nextQuestion);
 });
 
 $(document).on("click", ".answer", function() {
 	//stop the timer, and record the time it took to answer
-	timeStop();
 	game.questionTimes.push(game.timeLeft);
+	timeStop();
 	//store the value of the button clicked, and pull the correct answer
-	let answer = this.value;
+	let answer = $(this).data("answer");
 	let correct = game.questions[game.currentQuestion].correct;
 	//increment current question so the next will be pulled
 	game.currentQuestion++;
@@ -182,10 +223,19 @@ $(document).on("click", ".answer", function() {
 	$("#timer").fadeOut();
 	//pass the selected answer and the correct answer into the intraquestion function
 	$.when($("#answers").fadeOut()).done(function() {
-		intraQuestion(answer, correct);
+		interQuestion(answer, correct);
 	});
 });
 
-$("#next-question").click(function() {
-	$.when($("#next-question").fadeOut()).done(nextQuestion);
+$(document).on("click", "#new-game", function() {
+	
+	$.when($("#game-result").fadeOut()).done(function(){
+		$("#game-result").empty();
+// questionTimes: [],
+	// currentQuestion: 0,
+	// avgTime: 0,
+	// questionsRight: 0,
+	// correctPercentage: "",
+	// clockRunning: false,
+	})
 });

@@ -2,7 +2,6 @@
 #question,
 #answers,
 #question-result,
-#game-result,
-#next-question {
+#game-result{
     display: none;
 }
