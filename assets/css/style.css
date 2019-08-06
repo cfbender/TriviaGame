@@ -103,3 +103,18 @@ button:active {
 #question {
 	text-align: center;
 }
+
+
+@media screen and (max-width: 760px) {
+	.game-container {
+		max-width: 600px;
+	}
+
+	#header-splash{
+		max-width: 250px;
+	}
+
+	.main-header{
+		max-width: 750px;
+	}
+}
